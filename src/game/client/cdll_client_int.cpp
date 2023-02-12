@@ -369,7 +369,8 @@ class IClientPurchaseInterfaceV2 *g_pClientPurchaseInterface = (class IClientPur
 static ConVar *g_pcv_ThreadMode = NULL;
 
 // GAMEPADUI TODO - put this somewhere better. (Madi)
-#if defined( GAMEPADUI )
+// we could use this for adjusting certain features for Deck players. maybe add as an actual function on server and client.
+/*#if defined( GAMEPADUI )
 const bool IsSteamDeck()
 {
 	if ( CommandLine()->HasParm( "-gamepadui" ) )
@@ -384,8 +385,7 @@ const bool IsSteamDeck()
 
 	return false;
 }
-#endif
-
+#endif*/
 
 //-----------------------------------------------------------------------------
 // Purpose: interface for gameui to modify voice bans
@@ -1285,39 +1285,36 @@ void CHLClient::PostInit()
 #endif
 
 #if defined(GAMEPADUI)
-	if ( IsSteamDeck() )
+	CSysModule* pGamepadUIModule = g_pFullFileSystem->LoadModule( "gamepadui", "GAMEBIN", false );
+	if ( pGamepadUIModule != nullptr )
 	{
-		CSysModule* pGamepadUIModule = g_pFullFileSystem->LoadModule( "gamepadui", "GAMEBIN", false );
-		if ( pGamepadUIModule != nullptr )
+		GamepadUI_Log( "Loaded gamepadui module.\n" );
+
+		CreateInterfaceFn gamepaduiFactory = Sys_GetFactory( pGamepadUIModule );
+		if ( gamepaduiFactory != nullptr )
 		{
-			GamepadUI_Log( "Loaded gamepadui module.\n" );
-
-			CreateInterfaceFn gamepaduiFactory = Sys_GetFactory( pGamepadUIModule );
-			if ( gamepaduiFactory != nullptr )
+			g_pGamepadUI = (IGamepadUI*) gamepaduiFactory( GAMEPADUI_INTERFACE_VERSION, NULL );
+			if ( g_pGamepadUI != nullptr )
 			{
-				g_pGamepadUI = (IGamepadUI*) gamepaduiFactory( GAMEPADUI_INTERFACE_VERSION, NULL );
-				if ( g_pGamepadUI != nullptr )
-				{
-					GamepadUI_Log( "Initializing IGamepadUI interface...\n" );
+				GamepadUI_Log( "Initializing IGamepadUI interface...\n" );
 
-					factorylist_t factories;
-					FactoryList_Retrieve( factories );
-					g_pGamepadUI->Initialize( factories.appSystemFactory );
-				}
-				else
-				{
-					GamepadUI_Log( "Unable to pull IGamepadUI interface.\n" );
-				}
+				factorylist_t factories;
+				FactoryList_Retrieve( factories );
+				g_pGamepadUI->Initialize( factories.appSystemFactory );
 			}
 			else
 			{
-				GamepadUI_Log( "Unable to get gamepadui factory.\n" );
+				GamepadUI_Log( "Unable to pull IGamepadUI interface.\n" );
 			}
 		}
 		else
 		{
-			GamepadUI_Log( "Unable to load gamepadui module\n" );
+			GamepadUI_Log( "Unable to get gamepadui factory.\n" );
 		}
+	}
+	else
+	{
+		GamepadUI_Log( "Unable to load gamepadui module\n" );
 	}
 #endif // GAMEPADUI
 }
