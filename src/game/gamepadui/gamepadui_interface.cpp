@@ -62,11 +62,11 @@ void GamepadUI::Initialize( CreateInterfaceFn factory )
     g_pVGuiLocalize->AddFile( "resource/gameui_%language%.txt", "GAME", true );
     g_pVGuiLocalize->AddFile( "resource/deck_%language%.txt", "GAME", true );
 
-#ifdef HL2_RETAIL // not necessary on SDK2013 (Madi)
+//#ifdef HL2_RETAIL // not necessary on SDK2013 (Madi)
     SteamAPI_InitSafe();
     SteamAPI_SetTryCatchCallbacks( false );
     m_SteamAPIContext.Init();
-#endif // HL2_RETAIL
+//#endif // HL2_RETAIL
 
     m_pBasePanel = new GamepadUIBasePanel( GetRootVPanel() );
     if ( !m_pBasePanel )
@@ -75,7 +75,7 @@ void GamepadUI::Initialize( CreateInterfaceFn factory )
         return;
     }
 
-    GamepadUI_Log( "Overiding menu.\n" );
+    GamepadUI_Log( "Overriding menu.\n" );
 
     m_pGameUI->SetMainMenuOverride( GetBaseVPanel() );
 
@@ -93,9 +93,9 @@ void GamepadUI::Shutdown()
     if ( m_pBasePanel )
         m_pBasePanel->DeletePanel();
 
-#ifdef HL2_RETAIL // not necessary on SDK2013 (Madi)
+//#ifdef HL2_RETAIL // not necessary on SDK2013 (Madi)
     m_SteamAPIContext.Clear();
-#endif
+//#endif
 
     ConVar_Unregister();
     DisconnectTier3Libraries();
